@@ -17,6 +17,7 @@ using float128 = long double ;
 using varchar = const char* ;
 
 enum typesFg : uint8 {
+	type_void,
 	type_uint8,
 	type_uint16,
 	type_uint32,
@@ -116,64 +117,111 @@ template <typename T> struct is_arithmetic {
 	static constexpr bool val = is_integral<T>::val || is_floating_point<T>::val ;
 } ;
 
-// === getTypeByFlag ===
+// === GET TYPE BY FLAG ===
 
-template <typesFg fg> struct getTypeByFlag {} ;
-
-template <> struct getTypeByFlag<type_uint8> {
-	using type = uint8 ;
+template <typesFg fg = type_void> struct get_type_by_flag {
+	using Type = void ;
+	static Type* from(void* v) noexcept {
+		return v ;
+	}
 } ;
 
-template <> struct getTypeByFlag<type_uint16> {
-	using type = uint16 ;
+template <> struct get_type_by_flag<type_uint8> {
+	using Type = uint8 ;
+	static Type* from(void* v) noexcept {
+		return static_cast<Type*>(v) ;
+	}
 } ;
 
-template <> struct getTypeByFlag<type_uint32> {
-	using type = uint32 ;
+template <> struct get_type_by_flag<type_uint16> {
+	using Type = uint16 ;
+	static Type* from(void* v) noexcept {
+		return static_cast<Type*>(v) ;
+	}
 } ;
 
-template <> struct getTypeByFlag<type_uint64> {
-	using type = uint64 ;
+template <> struct get_type_by_flag<type_uint32> {
+	using Type = uint32 ;
+	static Type* from(void* v) noexcept {
+		return static_cast<Type*>(v) ;
+	}
 } ;
 
-template <> struct getTypeByFlag<type_uint128> {
-	using type = uint128 ;
+template <> struct get_type_by_flag<type_uint64> {
+	using Type = uint64 ;
+	static Type* from(void* v) noexcept {
+		return static_cast<Type*>(v) ;
+	}
 } ;
 
-template <> struct getTypeByFlag<type_int8> {
-	using type = int8 ;
+template <> struct get_type_by_flag<type_uint128> {
+	using Type = uint128 ;
+	static Type* from(void* v) noexcept {
+		return static_cast<Type*>(v) ;
+	}
 } ;
 
-template <> struct getTypeByFlag<type_int16> {
-	using type = int16 ;
+template <> struct get_type_by_flag<type_int8> {
+	using Type = int8 ;
+	static Type* from(void* v) noexcept {
+		return static_cast<Type*>(v) ;
+	}
 } ;
 
-template <> struct getTypeByFlag<type_int32> {
-	using type = int32 ;
+template <> struct get_type_by_flag<type_int16> {
+	using Type = int16 ;
+	static Type* from(void* v) noexcept {
+		return static_cast<Type*>(v) ;
+	}
 } ;
 
-template <> struct getTypeByFlag<type_int64> {
-	using type = int64 ;
+template <> struct get_type_by_flag<type_int32> {
+	using Type = int32 ;
+	static Type* from(void* v) noexcept {
+		return static_cast<Type*>(v) ;
+	}
 } ;
 
-template <> struct getTypeByFlag<type_int128> {
-	using type = int128 ;
+template <> struct get_type_by_flag<type_int64> {
+	using Type = int64 ;
+	static Type* from(void* v) noexcept {
+		return static_cast<Type*>(v) ;
+	}
 } ;
 
-template <> struct getTypeByFlag<type_float32> {
-	using type = float32 ;
+template <> struct get_type_by_flag<type_int128> {
+	using Type = int128 ;
+	static Type* from(void* v) noexcept {
+		return static_cast<Type*>(v) ;
+	}
 } ;
 
-template <> struct getTypeByFlag<type_float64> {
-	using type = float64 ;
+template <> struct get_type_by_flag<type_float32> {
+	using Type = float32 ;
+	static Type* from(void* v) noexcept {
+		return static_cast<Type*>(v) ;
+	}
 } ;
 
-template <> struct getTypeByFlag<type_float128> {
-	using type = float128 ;
+template <> struct get_type_by_flag<type_float64> {
+	using Type = float64 ;
+	static Type* from(void* v) noexcept {
+		return static_cast<Type*>(v) ;
+	}
 } ;
 
-template <> struct getTypeByFlag<type_varchar> {
-	using type = varchar ;
+template <> struct get_type_by_flag<type_float128> {
+	using Type = float128 ;
+	static Type* from(void* v) noexcept {
+		return static_cast<Type*>(v) ;
+	}
+} ;
+
+template <> struct get_type_by_flag<type_varchar> {
+	using Type = varchar ;
+	static Type* from(void* v) noexcept {
+		return static_cast<Type*>(v) ;
+	}
 } ;
 
 // === SHORTCUT ===
@@ -183,8 +231,6 @@ template <typename T> constexpr bool is_integral_v = is_integral<T>::val ;
 template <typename T> constexpr bool is_floating_point_v = is_floating_point<T>::val ;
 
 template <typename T> constexpr bool is_arithmetic_v = is_arithmetic<T>::val ;
-
-template <typesFg typesFg> using getTypeByFlag_v = typename getTypeByFlag<typesFg>::type ;
 
 }
 
