@@ -4,12 +4,6 @@
 
 namespace zdb {
 
-namespace impl {
-
-class Date ;
-
-}
-
 using uint8 = unsigned char ;
 using uint16 = unsigned short ;
 using uint32 = unsigned ;
@@ -24,7 +18,6 @@ using float32 = float ;
 using float64 = double ;
 using float128 = long double ;
 using text = std::string ;
-using date = impl::Date ;
 template <unsigned I> using varchar = impl::constant_char<I> ;
 
 namespace impl {
@@ -62,11 +55,6 @@ template <> struct is_floating_point<float128> { static constexpr bool val = tru
 template <typename T> struct is_text { static constexpr bool val = false ; } ;
 template <unsigned I> struct is_text<varchar<I>> { static constexpr bool val = true ; } ;
 template <> struct is_text<std::string> { static constexpr bool val = true ; } ;
-
-// TEXT TYPES SPECIALIZE
-
-template <typename T> struct is_date { static constexpr bool val = false ; } ;
-template <> struct is_date<date> { static constexpr bool val = true ; } ;
 
 // SEQUENCE IMPLEMENTATION
 

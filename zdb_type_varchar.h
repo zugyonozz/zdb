@@ -29,8 +29,8 @@ public:
 	constant_char& operator=(const char* str) noexcept { assign(str) ; return *this ; }
 	constant_char& operator=(const constant_char& o) noexcept { if (this != &o) assign(o.text) ; return *this ; }
 	constant_char& operator=(constant_char&& o) noexcept { if (this != &o) assign(o.text) ; return *this ; }
-	char& operator[](unsigned idx) noexcept { if (idx >= I) throw error_handler::out_of_constant_char_range{} ; return text[idx] ; }
-	const char& operator[](unsigned idx) const noexcept { if (idx >= I) throw error_handler::out_of_constant_char_range{} ; return text[idx] ; }
+	char& operator[](unsigned idx) { if (idx >= I) throw error_handler::out_of_constant_char_range{} ; return text[idx] ; }
+	const char& operator[](unsigned idx) const { if (idx >= I) throw error_handler::out_of_constant_char_range{} ; return text[idx] ; }
 	operator const char*() const noexcept { return text ; }
 	bool operator==(const char* str) const noexcept { return std::strncmp(text, str, I) == 0 ; }
 	bool operator!=(const char* str) const noexcept { return !(*this == str) ; }

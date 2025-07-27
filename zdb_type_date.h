@@ -1,5 +1,6 @@
 #pragma once
 #include "zdb_utils.h"
+#include "zdb_type_date.h"
 
 namespace zdb {
 
@@ -31,7 +32,7 @@ template <typename T> constexpr bool is_leap_year(const T& val) {
 	return (val % 400 == 0) ? true : (val % 100 == 0) ? false : (val % 4 == 0) ? true : false ;
 } ;
 
-constexpr uint8 len_day(const uint8& MM, const uint16& YY) noexcept {
+inline uint8 len_day(const uint8& MM, const uint16& YY) noexcept {
 	utils::range_control_handler(MM, static_cast<uint8>(1), static_cast<uint8>(12), error_handler::out_of_MM_range{}) ;
 	if (MM == 2) { if (is_leap_year(YY)) return 29 ; else return 28 ; }
 	constexpr uint8 MM_31[] = {1, 3, 5, 7, 8, 10, 12} ;
@@ -43,18 +44,20 @@ constexpr uint8 len_day(const uint8& MM, const uint16& YY) noexcept {
 
 namespace impl {
 
-class Date {
+// DATE IMPLEMENTATION
+
+class Date_impl {
 private :
-	uint8 DD, MM ;
-	uint16 YY ;
+	unsigned char DD, MM ;
+	unsigned short YY ;
 
 public :
-	Date(uint8 DD, uint8 MM, uint16 YY) noexcept : 
+	Date_impl(uint8 DD, uint8 MM, uint16 YY) noexcept : 
 	DD(utils::range_control_handler(DD, static_cast<uint8>(1), utils::len_day(MM, YY), error_handler::out_of_DD_range{})), 
 	MM(utils::range_control_handler(MM, static_cast<uint8>(1), static_cast<uint8>(12), error_handler::out_of_MM_range{})), 
 	YY(utils::range_control_handler(YY, static_cast<uint16>(0), static_cast<uint16>(~0), error_handler::YY_underflow{})) {}
-	
-	Date(const varchar<8>& date_str) {
+		
+	Date_impl(const varchar<8>& date_str) noexcept {
 		DD = static_cast<uint8>(utils::char2num(date_str[0]) * 10 + utils::char2num(date_str[1])) ;
 		MM = static_cast<uint8>(utils::char2num(date_str[2]) * 10 + utils::char2num(date_str[3])) ;
 		YY = static_cast<uint16>(utils::char2num(date_str[4]) * 1000 + utils::char2num(date_str[5]) * 100 + utils::char2num(date_str[6]) * 10 + utils::char2num(date_str[7])) ;
@@ -64,14 +67,23 @@ public :
 	const uint8& getDD() const noexcept { return DD ; }
 	const uint8& getMM() const noexcept { return MM ; }
 	const uint16& getYY() const noexcept { return YY ; }
-	uint8 getDD() noexcept { return DD ; }
-	uint8 getMM() noexcept { return MM ; }
-	uint16 getYY() noexcept { return YY ; }
-	Date& setDD(const uint8& DD) noexcept { this->DD = DD ; return *this ; }
-	Date& setMM(const uint8& MM) noexcept { this->MM = MM ; return *this ; }
-	Date& setYY(const uint16& YY) noexcept { this->YY = YY ; return *this ; }
+	uint8& getDD() noexcept { return DD ; }
+	uint8& getMM() noexcept { return MM ; }
+	uint16& getYY() noexcept { return YY ; }
+	Date_impl& setDD(const uint8& DD) noexcept { this->DD = DD ; return *this ; }
+	Date_impl& setMM(const uint8& MM) noexcept { this->MM = MM ; return *this ; }
+	Date_impl& setYY(const uint16& YY) noexcept { this->YY = YY ; return *this ; }
+	
 } ;
 
+// DATE TYPES SPECIALIZE
+
+template <typename T> struct is_date { static constexpr bool val = false ; } ;
+template <> struct is_date<Date_impl> { static constexpr bool val = true ; } ;
+template <typename T> constexpr bool is_date_v = impl::is_date<T>::val ;
+
 }
+
+using Date = impl::Date_impl ;
 
 }
