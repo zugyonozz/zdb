@@ -16,7 +16,7 @@ struct invalid_string_len { const char* operator()() const noexcept { return "In
 namespace utils {
 
 template <typename T, typename Error_Handler> const T& range_control_handler(const T& val, const T& lo, const T& hi, Error_Handler herr) {
-	static_assert(impl::is_arithmetic_v<T>, "val, lo, hi must be arithmetics type!") ;
+	static_assert(utils::is_arithmetic_v<T>, "val, lo, hi must be arithmetics type!") ;
 	if(lo > val && hi < val) throw herr() ;
 	return val ;
 }
@@ -27,7 +27,7 @@ template <typename T = uint32> T char2num(char c) {
 }
 
 template <typename T> constexpr bool is_leap_year(const T& val) {
-	static_assert(impl::is_arithmetic_v<T>, "type must be arithmetic type!") ;
+	static_assert(utils::is_arithmetic_v<T>, "type must be arithmetic type!") ;
 	return (val % 400 == 0) ? true : (val % 100 == 0) ? false : (val % 4 == 0) ? true : false ;
 } ;
 

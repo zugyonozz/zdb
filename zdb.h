@@ -16,6 +16,8 @@ namespace impl {
 template <unsigned I, typename T> struct Tuple_id ;
 
 template <unsigned I, typename T> class Node {
+	static_assert(utils::is_defined<T>, "undefined type!") ;
+
 protected :
 	T* val ;
 	unsigned size_, cap_ ;
@@ -117,10 +119,11 @@ public :
 
 	template <unsigned I> decltype(auto) get() noexcept { return static_cast<Node<I, Tuple_id_t<I, Tuple_impl<Ts...>>>&>(*this).get() ; }
 	template <unsigned I> decltype(auto) get() const noexcept { return static_cast<const Node<I, Tuple_id_t<I, Tuple_impl<Ts...>>>&>(*this).get() ; }
+	template <unsigned Row> Tuple_impl& getRow() noexcept { return { get<sequence<Is...>>()[Row]...} ; }
 } ;
 
 }
 
-template <typename ... Ts> using Table = impl::Tuple_impl<impl::sequence_for<Ts...>, Ts...> ;
+template <typename ... Ts> using Tuple = impl::Tuple_impl<impl::sequence_for<Ts...>, Ts...> ;
 
 }

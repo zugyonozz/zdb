@@ -58,17 +58,15 @@ template <> struct is_floating_point<float64> { static constexpr bool val = true
 template <> struct is_floating_point<float128> { static constexpr bool val = true ; } ;
 
 // TEXT TYPES SPECIALIZE
+
 template <typename T> struct is_text { static constexpr bool val = false ; } ;
 template <unsigned I> struct is_text<varchar<I>> { static constexpr bool val = true ; } ;
 template <> struct is_text<std::string> { static constexpr bool val = true ; } ;
 
-// SHORTCUT SPECIALIZE
+// TEXT TYPES SPECIALIZE
 
-template <typename T> constexpr bool is_integral_v = is_integral<T>::val ;
-template <typename T> constexpr bool is_floating_point_v = is_floating_point<T>::val ;
-template <typename T> constexpr bool is_text_v = is_text<T>::val ;
-template <typename T> constexpr bool is_arithmetic_v = is_integral_v<T> || is_floating_point_v<T> ;
-template <typename T> constexpr bool is_defined_type = is_arithmetic_v<T> || is_text_v<T> ;
+template <typename T> struct is_date { static constexpr bool val = false ; } ;
+template <> struct is_date<date> { static constexpr bool val = true ; } ;
 
 // SEQUENCE IMPLEMENTATION
 
