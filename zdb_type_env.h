@@ -1,6 +1,8 @@
 #pragma once
 #include <string>
 #include "zdb_type_varchar.h"
+#include "zdb_type_delete_reference.h"
+#include "zdb_type_sequence.h"
 
 namespace zdb {
 
@@ -55,21 +57,6 @@ template <> struct is_floating_point<float128> { static constexpr bool val = tru
 template <typename T> struct is_text { static constexpr bool val = false ; } ;
 template <unsigned I> struct is_text<varchar<I>> { static constexpr bool val = true ; } ;
 template <> struct is_text<std::string> { static constexpr bool val = true ; } ;
-
-// SEQUENCE IMPLEMENTATION
-
-template <unsigned... Is> struct sequence {} ;
-template <unsigned I, unsigned... Is> struct sequence_helper : sequence_helper<I - 1, I - 1, Is...> {} ;
-template <unsigned... Is> struct sequence_helper<0, Is...> { using Type = sequence<Is...>; } ;
-template <unsigned N> using make_sequence = typename sequence_helper<N>::Type ;
-template <typename... Ts> using sequence_for = make_sequence<sizeof...(Ts)> ;
-
-// DELETE REFERENCE IMPLEMENTATION
-
-template <typename T> struct del_ref { using Type = T ; } ;
-template <typename T> struct del_ref<T&> { using Type = T ; } ;
-template <typename T> struct del_ref<T&&> { using Type = T ; } ;
-template <typename T> using del_ref_t = typename del_ref<T>::Type ;
 
 }
 

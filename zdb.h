@@ -12,7 +12,7 @@ struct out_of_node_range { const char* operator()() const noexcept { return "Nod
 
 namespace utils {
 
-template <typename T> constexpr bool is_defined = is_arithmetic_v<T> || is_text_v<T> || impl::is_date_v<T> ;
+template <typename T> constexpr bool is_defined = is_arithmetic_v<T> || is_text_v<T> || is_date_v<T> ;
 
 }
 
@@ -21,32 +21,61 @@ namespace impl {
 // TABLE IMPLEMENTATION
 
 template <unsigned I, typename T> class Node {
+private :
 	static_assert(utils::is_defined<T>, "undefined type!") ;
+
+	Node& swap(Node& o) noexcept {
+		swap(data_, o.data_) ;
+		swap(size_, size_) ;
+		swap(cap_, cap_) ;
+	}
 
 protected :
 	T* data_ ;
-	unsigned size_, cap_ ;
+	unsigned size_ ; 
+	unsigned cap_ ;
 
 public :
 	Node() noexcept : data_(nullptr), size_(0), cap_(0) {}
-	Node(const T& val) noexcept : size_(1), cap_(1) { data_ = new T[cap_] ; this->data_[0] = val ; }
-	Node(T&& val) noexcept : size_(1), cap_(1) { data_ = new T[cap_] ; this->data_[0] = utils::move(val) ; }
-	Node(Node&& o) noexcept : data_(o.data_), size_(o.size_), cap_(o.cap_) { o.data_ = nullptr ; o.size_ = o.cap_ = 0 ; }
-	Node(const Node& o) noexcept : size_(o.size_), cap_(o.cap_) { this->data_ = new T[o.cap_] ; for(unsigned i = 0; i < size_; i++) this->data_[i] = o.data_[i] ; }
+	
+	Node(const T& val) : size_(1), cap_(1) { 
+		try {
+			data_ = new T[cap_] ;
+			this->data_[0] = val ;
+		} catch (...) {
+			delete [] data_ ;
+			throw ;
+		}
+	}
+	Node(T&& val) noexcept : size_(1), cap_(1) { 
+		data_ = new T[cap_] ; 
+		this->data_[0] = utils::move(val) ; 
+	}
+	
+	Node(Node&& o) noexcept : data_(o.data_), size_(o.size_), cap_(o.cap_) { 
+		o.data_ = nullptr ; 
+		o.size_ = o.cap_ = 0 ; 
+	}
+
+	Node(const Node& o) noexcept : size_(o.size_), cap_(o.cap_) { 
+		this->data_ = new T[o.cap_] ; 
+		for(unsigned i = 0; i < size_; i++) 
+		this->data_[i] = o.data_[i] ; 
+	}
+	
 	~Node() noexcept { delete [] data_ ; }
 
 	Node& operator=(const Node& o) noexcept {
-		if(this == &o) return *this ;
-		delete [] data_ ;
-		size_ = o.size_ ;
-		cap_ = o.cap_ ;
-		data_ = new T[o.cap_] ;
-		for(unsigned i = 0; i < size_; i++) data_[i] = o.data_[i] ;
+		if(this == &o) 
+			return *this ;
+		Node tmp(o) ;
+		swap(tmp) ;
 		return *this ;
 	}
 
-	Node& operator=(Node&& o) noexcept {
-		if(this == &o) return *this ;
+	Node& operator=(Node&& o) {
+		if(this == &o) 
+			return *this ;
 		delete [] data_ ;
 		size_ = o.size_ ;
 		cap_ = o.cap_ ;
@@ -56,54 +85,113 @@ public :
 		return *this ;
 	}
 
-	T& operator[](unsigned idx) { if (idx >= size_) throw error_handler::out_of_node_range() ; return data_[idx] ; }
-	const T& operator[](unsigned idx) const { if (idx >= size_) throw error_handler::out_of_node_range() ; return data_[idx] ; }
-	T* data(unsigned idx) { if(idx >= size_) throw error_handler::out_of_node_range() ; return &data_[idx] ; }
-	unsigned size() const noexcept { return size_ ; }
-	unsigned cap() const noexcept { return cap_ ; }
+	T& operator[](unsigned idx) { 
+		if (idx >= size_) 
+			throw error_handler::out_of_node_range() ; 
+		return data_[idx] ; 
+	}
 
-	Node& reserve(unsigned newCap) noexcept {
-		if (newCap <= cap_) return *this ;
+	const T& operator[](unsigned idx) const { 
+		if (idx >= size_) 
+			throw error_handler::out_of_node_range() ; 
+		return data_[idx] ; 
+	}
+
+	T* data(unsigned idx) { 
+		if(idx >= size_) 
+			throw error_handler::out_of_node_range() ; 
+		return &data_[idx] ; 
+	}
+
+	unsigned size() const noexcept { 
+		return size_ ; 
+	}
+
+	unsigned cap() const noexcept { 
+		return cap_ ; 
+	}
+
+	void reserve(unsigned newCap) noexcept {
+		if (newCap <= cap_) 
+			return ;
 		T* tmp = new T[newCap] ;
-		for (unsigned i = 0; i < size_; i++) tmp[i] = data_[i] ;
+		for (unsigned i = 0; i < size_; i++) 
+			tmp[i] = data_[i] ;
 		delete [] data_ ;
 		data_ = tmp ;
 		cap_ = newCap ;
-		return *this ;
 	}
 
-	Node& push(const T& val) noexcept {
-		if(size_ == cap_) reserve(cap_ + (cap_ / 2) + 1) ;
+	void push(const T& val) noexcept {
+		if(size_ == cap_) 
+			reserve(cap_ == 0 ? 1 : cap_ * 2) ;
 		data_[size_] = val ;
 		++size_ ;
 		return *this ;
 	}
 
-	Node& erase(unsigned idx) {
-		if (idx >= size_) throw error_handler::out_of_node_range() ;
-        for (unsigned i = idx; i < size_ - 1; ++i) data_[i] = data_[i + 1] ;
-        --size_ ;
-        return *this;
+	void push(T&& val) noexcept {
+		if(size_ == cap_) 
+			reserve(cap_ == 0 ? 1 : cap_ * 2) ;
+		data_[size_] = utils::move(val) ;
+		++size_ ;
 	}
 
-	Node& pop() noexcept { if (size_ > 0) --size_ ; return *this ;}
+	void erase(unsigned idx) {
+		if (idx >= size_) 
+			throw error_handler::out_of_node_range() ;
+        for (unsigned i = idx; i < size_ - 1; ++i) 
+			data_[i] = data_[i + 1] ;
+        --size_ ;
+	}
 
-    Node& shrink_to_fit() {
-        if (size_ == cap_ || size_ == 0) return *this ;
+	void pop() noexcept { 
+		if (size_ > 0) 
+			--size_ ;
+	}
+
+    void shrink_to_fit() {
+        if (size_ == cap_ || size_ == 0) 
+			return ;
         T* tmp = new T[size_] ;
-        for (unsigned i = 0; i < size_; i++) tmp[i] = data_[i] ;
+        for (unsigned i = 0; i < size_; i++) 
+			tmp[i] = data_[i] ;
         delete[] data_ ;
-        data_ = tmp;
-        cap_ = size_;
-        return *this;
+        data_ = tmp ;
+        cap_ = size_ ;
     }
 
-	T& get() noexcept { return data_ ; }
-	const T& get() const noexcept { return data_ ; }
-	T* begin() noexcept { return data_ ; }
-	T* end() noexcept { return data_ + size_ ; }
-	const T* begin() const noexcept { return data_ ; }
-	const T* end() const noexcept { return data_ + size_ ; }
+	bool is_empty() const noexcept {
+		return size_ == 0 ;
+	}
+
+	void clear() noexcept {
+		size_ = 0 ;
+	}
+
+	T& get() noexcept { 
+		return data_ ; 
+	}
+
+	const T& get() const noexcept { 
+		return data_ ; 
+	}
+
+	T* begin() noexcept { 
+		return data_ ; 
+	}
+
+	T* end() noexcept { 
+		return data_ + size_ ; 
+	}
+
+	const T* begin() const noexcept { 
+		return data_ ; 
+	}
+
+	const T* end() const noexcept { 
+		return data_ + size_ ; 
+	}
 } ;
 
 template <unsigned I, typename ... Ts> struct Tuple_id ;

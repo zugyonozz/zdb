@@ -80,6 +80,11 @@ public :
 
 template <typename T> struct is_date { static constexpr bool val = false ; } ;
 template <> struct is_date<Date_impl> { static constexpr bool val = true ; } ;
+
+}
+
+namespace utils {
+
 template <typename T> constexpr bool is_date_v = impl::is_date<T>::val ;
 
 }
